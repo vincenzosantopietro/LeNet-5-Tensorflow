@@ -21,4 +21,5 @@ X_test = np.pad(X_test, ((0,0),(2,2),(2,2),(0,0)), 'constant')
 print("New Input shape: {}".format(X_train[0].shape))
 
 lenet_network = Lenet5(X_train,y_train,X_test,y_test,X_validation,y_validation)
-lenet_network.train(epochs=10,batch_size=100)
+accuracy = lenet_network.train(epochs=10,batch_size=100)
+print("Accuracy on test set: {:.3f}".format(accuracy))

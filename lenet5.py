@@ -106,6 +106,8 @@ class Lenet5():
                     #print("Epoch {} - validation accuracy {:.3f} ".format(epoch+1,validation_accuracy))
                     total_steps.set_description("Epoch {} - validation accuracy {:.3f} ".format(epoch+1,validation_accuracy))
 
+            test_accuracy = self.evaluate(self.test_data,self.test_labels,batch_size=batch_size)
+            return test_accuracy
 
     def evaluate(self,X_data, y_data,batch_size):
         num_examples = len(X_data)
