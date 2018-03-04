@@ -34,7 +34,8 @@ class Lenet5():
 
         # Layer 1: Input 32x32x1, Output 28x28x6
         self.conv1_kernels = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 6], mean=self.mu, stddev=self.sigma))
-        self.conv1_biases = tf.Variable(tf.zeros(6))
+        self.conv1_biases = tf.get_variable(name="conv1_biases", shape=[6],
+                                            initializer=tf.random_normal_initializer(stddev=0.3))
         self.conv1 = tf.nn.conv2d(self.X, self.conv1_kernels, [1, 1, 1, 1], padding='VALID') + self.conv1_biases
         # Pooling -> from 28x28 to 14x14
         self.pool1 = tf.nn.max_pool(self.conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
@@ -43,7 +44,8 @@ class Lenet5():
 
         # Layer 2: Input 14x14x6, Output 10x10x16
         self.conv2_kernels = tf.Variable(tf.truncated_normal(shape=[5, 5, 6, 16], mean=self.mu, stddev=self.sigma))
-        self.conv2_biases = tf.Variable(tf.zeros(16))
+        self.conv2_biases = tf.get_variable(name="conv2_biases", shape=[16],
+                                            initializer=tf.random_normal_initializer(stddev=self.sigma))
         self.conv2 = tf.nn.conv2d(self.conv1, self.conv2_kernels, [1, 1, 1, 1], padding='VALID') + self.conv2_biases
         # Pooling -> from 10x10x16 to 5x5x16
         self.pool2 = tf.nn.max_pool(self.conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
@@ -55,21 +57,24 @@ class Lenet5():
 
         # Fully Connected Layer n.1
         self.fcl1_weights = tf.Variable(tf.truncated_normal(shape=[400, 120], mean=self.mu, stddev=self.sigma))
-        self.fcl1_biases = tf.Variable(tf.zeros(120))
+        self.fcl1_biases = tf.get_variable(name="fc1_biases", shape=[120],
+                                           initializer=tf.random_normal_initializer(stddev=self.sigma))
         self.fcl1 = tf.matmul(self.flattened, self.fcl1_weights) + self.fcl1_biases
         # Activation 3
         self.fcl1 = tf.nn.relu(self.fcl1)
 
         # Fully Connected Layer n.2
         self.fcl2_weights = tf.Variable(tf.truncated_normal(shape=[120, 84], mean=self.mu, stddev=self.sigma))
-        self.fcl2_biases = tf.Variable(tf.zeros(84))
+        self.fcl2_biases = tf.get_variable(name="fc2_biases", shape=[84],
+                                           initializer=tf.random_normal_initializer(stddev=self.sigma))
         self.fcl2 = tf.matmul(self.fcl1, self.fcl2_weights) + self.fcl2_biases
         # Activation 4
         self.fcl2 = tf.nn.relu(self.fcl2)
 
         # Fully Connected Layer n.3
         self.fcl3_weights = tf.Variable(tf.truncated_normal(shape=[84, 10], mean=self.mu, stddev=self.sigma))
-        self.fcl3_biases = tf.Variable(tf.zeros(10))
+        self.fcl3_biases = tf.get_variable(name="fc3_biases", shape=[10],
+                                           initializer=tf.random_normal_initializer(stddev=self.sigma))
         self.logits = tf.matmul(self.fcl2, self.fcl3_weights) + self.fcl3_biases
 
         # Loss and metrics
@@ -103,7 +108,6 @@ class Lenet5():
 
                 if self.validation_data != None:
                     validation_accuracy = self.evaluate(self.validation_data, self.validation_labels, batch_size)
-                    # print("Epoch {} - validation accuracy {:.3f} ".format(epoch+1,validation_accuracy))
                     total_steps.set_description(
                         "Epoch {} - validation accuracy {:.3f} ".format(epoch + 1, validation_accuracy))
 
