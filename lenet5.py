@@ -87,7 +87,8 @@ class Lenet5():
         self.accuracy_operation = tf.reduce_mean(tf.cast(self.correct_prediction, tf.float32))
         self.saver = tf.train.Saver()
 
-    def train(self, epochs, batch_size):
+
+    def train(self, epochs, batch_size, auto_save=True):
         assert (epochs > 0 and batch_size > 0)
 
         num_examples = len(self.train_data)
@@ -99,7 +100,7 @@ class Lenet5():
             total_steps = trange(epochs)
             for epoch in total_steps:
                 self.train_data, self.train_labels = shuffle(self.train_data, self.train_labels)
-                for offset in xrange(0, num_examples, batch_size):
+                for offset in range(0, num_examples, batch_size):
                     end = offset + batch_size
                     X_batch, y_batch = self.train_data[offset:end], self.train_labels[offset:end]
 
@@ -110,6 +111,12 @@ class Lenet5():
                     validation_accuracy = self.evaluate(self.validation_data, self.validation_labels, batch_size)
                     total_steps.set_description(
                         "Epoch {} - validation accuracy {:.3f} ".format(epoch + 1, validation_accuracy))
+                    # print("Epoch {} - validation accuracy {:.3f} ".format(epoch+1,validation_accuracy))
+                    total_steps.set_description(
+                        "Epoch {} - validation accuracy {:.3f} ".format(epoch + 1, validation_accuracy))
+
+                if auto_save and (epoch % 10 == 0):
+                    save_path = self.saver.save(session, 'tmp/model.ckpt'.format(epoch))
 
             test_accuracy = self.evaluate(self.test_data, self.test_labels, batch_size=batch_size)
             return test_accuracy
@@ -123,3 +130,7 @@ class Lenet5():
             accuracy = sess.run(self.accuracy_operation, feed_dict={self.X: batch_x, self.y: batch_y})
             total_accuracy += (accuracy * len(batch_x))
         return total_accuracy / num_examples
+
+    def restore_model(self, path):
+        with tf.Session() as session:
+            self.saver.restore(sess=session, save_path=path)
